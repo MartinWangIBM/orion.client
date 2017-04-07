@@ -542,7 +542,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 			}
 			for (var i=0; i < items.length; i++) {
 				item = items[i];
-				if (!item.Location || item.Projects /*Workspace root, not a file or folder*/) {
+				if (!item.Location) {
 					return false;
 				}
 			}
@@ -562,7 +562,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 				return { item: item, parent: item.Parents[0] };
 			}
 			// item is a top-level folder (ie. project). Find the workspace (which is the parent for rename purposes)
-			return fileClient.loadWorkspace(fileClient.fileServiceRootURL(item.Location)).then(function(workspace) {
+			return fileClient.getWorkspace(item.Location).then(function(workspace) {
 				return Deferred.when(workspace.Children || fileClient.fetchChildren(workspace)).then(function(children) {
 					workspace.Children = children;
 					var itemIsProject = workspace.Children.some(function(child) {
@@ -582,8 +582,10 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 		* Iterate over an array of items and return the target folder. The target
 		* folder of an item is either itself (if it is a dir) or its parent. If there
 		* are multiple target folders, return the first.
+		* 
+		* If the root folder is allowed, all items need to be directories
 		*/
-		function getTargetFolder(items) {
+		function getTargetFolder(items, allowRoot) {
 			var folder;
 			if (!Array.isArray(items)) {
 				items = [items];
@@ -601,17 +603,17 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 				}
 				return false;
 			});
-			if (folder && mFileUtils.isAtRoot(folder.Location)) {
+			if (!allowRoot && folder && mFileUtils.isAtRoot(folder.Location)) {
 				return null;
 			}
 			return folder;
 		}
 		
-		function checkFolderSelection(item) {
+		function checkFolderSelection(item, allowRoot) {
 			if (!explorer || !explorer.isCommandsVisible()) {
 				return false;
 			}
-			return getTargetFolder(item);
+			return getTargetFolder(item, allowRoot);
 		}
 		
 		function doMove(item, newText) {
@@ -619,16 +621,6 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 			Deferred.when(getLogicalModelItems(item), function(logicalItems) {
 				item = logicalItems.item;
 				var parent = logicalItems.parent;
-				if (parent && parent.Projects) {
-					//special case for moving a project. We want to move the project rather than move the project's content
-					parent.Projects.some(function(project) {
-						if (project.Id === item.Id) {
-							moveLocation = project.Location;
-							return true;
-						}
-						return false;
-					});
-				}
 				var parentLocation = parent.Location || parent.WorkspaceLocation;
 				var deferred = fileClient.moveFile(moveLocation, parentLocation, newText);
 				progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Renaming ${0}"], moveLocation)).then(
@@ -819,25 +811,6 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 							var deleteLocation = item.Location;
 							return Deferred.when(getLogicalModelItems(item), function(logicalItems) {
 								item = logicalItems.item;
-								var parent = logicalItems.parent;
-								if (parent && parent.Projects) {
-									//special case for deleting a project. We want to remove the project rather than delete the project's content
-									deleteLocation = null;
-									parent.Projects.some(function(project) {
-										if (project.Id === item.Id) {
-											deleteLocation = project.Location;
-											return true;
-										}
-										return false;
-									});
-								}
-								// special case for deleting a project displayed in the project nav
-								if (item.type === "ProjectRoot" && parent.ProjectLocation) {
-									deleteLocation = parent.ProjectLocation;
-								}
-								if (!deleteLocation) {
-									return new Deferred().resolve();
-								}
 								var _delete = fileClient.deleteFile(deleteLocation, {itemLocation: item.Location});
 								return progressService.showWhile(_delete, i18nUtil.formatMessage(messages["Deleting ${0}"], deleteLocation)).then(
 									function() {
@@ -1232,7 +1205,15 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 			if (!explorer || !explorer.isCommandsVisible()) {
 				return false;
 			}
-			return checkFolderSelection(items);
+			var folder = checkFolderSelection(items, true);
+			if (folder && mFileUtils.isAtRoot(folder.Location)) {
+				if (bufferedSelection && bufferedSelection.some(function(currentItem) {
+					if (!currentItem.Directory) return true;
+				})) {
+					return false;
+				}
+			}
+			return true;
 		};
 		
 		var pasteFromBufferCommand = new mCommands.Command({
@@ -1240,10 +1221,10 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 				id: "eclipse.pasteSelections", //$NON-NLS-0$
 				visibleWhen: canPaste,
 				callback: function(data) {
-					var item = getTargetFolder(data.items);
+					var item = getTargetFolder(data.items, true);
 					if (bufferedSelection.length > 0 && item) {
 						// Do not allow pasting into the Root of the Workspace
-						if (mFileUtils.isAtRoot(item.Location)) {
+						if (mFileUtils.isAtRoot(item.Location) && !item.Directory) {
 							errorHandler(messages["Cannot paste into the root"]);
 							return;
 						}

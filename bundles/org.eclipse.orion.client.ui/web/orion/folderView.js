@@ -10,7 +10,6 @@
 
 /*eslint-env browser, amd*/
 define([
-	'orion/globalCommands',
 	'orion/explorers/explorer-table',
 	'orion/explorers/navigatorRenderer',
 	'orion/fileCommands',
@@ -25,7 +24,7 @@ define([
 	'orion/projects/projectView',
 	'orion/generalPreferences',
 	'orion/section'
-], function(mGlobalCommands, mExplorerTable, mNavigatorRenderer, FileCommands, mMarkdownView, mProjectEditor, PageUtil, 
+], function(mExplorerTable, mNavigatorRenderer, FileCommands, mMarkdownView, mProjectEditor, PageUtil, 
 			URITemplate, lib, objects, util, Deferred, mProjectView, mGeneralPrefs, mSection) {
 
 	var ID_COUNT = 0;
@@ -110,13 +109,6 @@ define([
 			}
 		},
 		isCommandsVisible: function() {
-			if (!this.selection) {
-				return false;
-			}
-			var mainSplitter = mGlobalCommands.getMainSplitter();
-			if (mainSplitter) {
-				return mainSplitter.splitter.isClosed();
-			}
 			return true;
 		},
 		scope: function(childrenLocation) {
@@ -125,15 +117,10 @@ define([
 			});
 		},
 		scopeUp: function() {
-			var navigate;
-			var root = this.treeRoot;
-			var prnt = root.Parents && root.Parents[0];
-			if (prnt) {
-				navigate = prnt.ChildrenLocation;
-			} else {
-				navigate = this.fileClient.fileServiceRootURL(root.Location);
-			}
-			this.scope(navigate);
+			var prnt = this.treeRoot.Parents && this.treeRoot.Parents[0];
+			Deferred.when(prnt && prnt.ChildrenLocation || this.fileClient.getWorkspace(this.treeRoot.Location)).then(function(navigate) {
+				this.scope(navigate);
+			}.bind(this));
 		},
 		scopeDown: function(item) {
 			this.scope(item.ChildrenLocation);
@@ -203,23 +190,6 @@ define([
 					commandRegistry: this.commandRegistry
 				});
 			}
-			var mainSplitter = mGlobalCommands.getMainSplitter();
-			if (mainSplitter) {
-				mGlobalCommands.getMainSplitter().splitter.addEventListener("toggle", this._splitterToggleListener = function(e) {
-					[this.markdownView, this.projectEditor, this.projectView, this.folderNavExplorer].forEach(function(view) {
-						if (view && view.setCommandsVisible) {
-							view.setCommandsVisible(e.closed);
-						}
-					});
-				}.bind(this));
-			}
-		},
-		_isCommandsVisible: function() {
-			var mainSplitter = mGlobalCommands.getMainSplitter();
-			if (mainSplitter) {
-				return mainSplitter.splitter.isClosed();
-			}
-			return true;
 		},
 		displayFolderView: function(root) {
 			var children = root.Children;
@@ -271,7 +241,10 @@ define([
 								filteredResources: filteredResources
 							});
 							foldersSection.embedExplorer(this.folderNavExplorer);
-							this.folderNavExplorer.setCommandsVisible(this._isCommandsVisible());
+							this.folderNavExplorer.setCommandsVisible(true);
+							var actionsNodeScope = foldersSection.actionsNode.id;
+							this.commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.deleteFile", 0); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
+							this.commandRegistry.renderCommands(actionsNodeScope, actionsNodeScope, this._metadata, this.folderNavExplorer, "tool"); //$NON-NLS-0$	
 							this.folderNavExplorer.loadRoot(this._metadata);
 						}
 					} else if (sectionName === "readme") {
@@ -317,10 +290,6 @@ define([
 			}
 		},
 		destroy: function() {
-			var mainSplitter = mGlobalCommands.getMainSplitter();
-			if (mainSplitter) {
-				mainSplitter.splitter.removeEventListener("toggle", this._splitterToggleListener);
-			}
 			if (this.folderNavExplorer) {
 				this.folderNavExplorer.destroy();
 			}
