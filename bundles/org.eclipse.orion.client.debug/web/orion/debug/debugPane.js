@@ -125,11 +125,17 @@ define([
         stopReason.classList.add('stopReason');
         domNode.appendChild(stopReason);
 
+        // Debug frame
+        // Put everything below in this frame so that buttons and the stop reason will always stay top
+        var debugFrame = document.createElement('div');
+        debugFrame.classList.add('debugFrame');
+        domNode.appendChild(debugFrame);
+
         // Stack trace
         var stackTrace = document.createElement('div');
         stackTrace.classList.add('stackTrace');
         stackTrace.classList.add('dataArea');
-        var stackTraceSection = new mSection.Section(domNode, {
+        var stackTraceSection = new mSection.Section(debugFrame, {
             id: 'DebugStackTrace',
             title: messages['StackTrace'],
             canHide: true,
@@ -148,7 +154,7 @@ define([
         inputBox.setAttribute('type', 'text');
         input.appendChild(inputBox);
         inputOutputWrapper.appendChild(input);
-        var outputSection = new mSection.Section(domNode, {
+        var outputSection = new mSection.Section(debugFrame, {
             id: 'DebugOutput',
             title: messages['Output'],
             canHide: true,
@@ -162,7 +168,7 @@ define([
         var watchWrapper = document.createElement('div');
         watchWrapper.classList.add('watchList');
         watchWrapper.classList.add('dataArea');
-        var watchSection = new mSection.Section(domNode, {
+        var watchSection = new mSection.Section(debugFrame, {
             id: 'DebugWatch',
             title: messages['Watch'],
             canHide: true,
@@ -176,7 +182,7 @@ define([
         var variablesWrapper = document.createElement('div');
         variablesWrapper.classList.add('variableList');
         variablesWrapper.classList.add('dataArea');
-        var variablesSection = new mSection.Section(domNode, {
+        var variablesSection = new mSection.Section(debugFrame, {
             id: 'DebugVariables',
             title: messages['Variables'],
             canHide: true,
@@ -187,7 +193,7 @@ define([
         var breakpointsWrapper = document.createElement('div');
         breakpointsWrapper.classList.add('breakpoints');
         breakpointsWrapper.classList.add('dataArea');
-        var breakpointsSection = new mSection.Section(domNode, {
+        var breakpointsSection = new mSection.Section(debugFrame, {
             id: 'DebugBreakpoints',
             title: 'Breakpoints',
             canHide: true,

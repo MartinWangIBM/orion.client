@@ -1,5 +1,4 @@
 .debugPaneWrapper {
-    overflow-y: auto;
     width: 100%;
     height: 100%;
 }
@@ -7,6 +6,9 @@
 .debugPane {
     padding: 5px;
     white-space: normal;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .debugPane .debugButtons button {
@@ -17,14 +19,9 @@
     display: none;
 }
 
-.debugPane .title {
-    margin-top: 10px;
-    border: 1px solid #ccc;
-    padding: 2px 4px;
-    cursor: pointer;
-    user-select: none;
-    font-size: 12px;
-    line-height: 16px;
+.debugPane .debugFrame {
+    overflow-y: auto;
+    height: auto;
 }
 
 .debugPane .dataArea {
