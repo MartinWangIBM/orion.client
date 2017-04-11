@@ -57,20 +57,22 @@ define([
 	'orion/keyBinding',
 	'orion/debug/breakpoint',
 	'orion/editor/annotations',
-	'orion/debug/debugService',
-	'orion/debug/nativeDeployService',
-	'i18n!orion/debug/nls/messages',
-	'orion/debug/debugFileImpl',
+	'orion/debug/debugService'
 ], function(
 	messages, Sidebar, mInputManager, mCommands, mGlobalCommands,
 	mTextModelFactory, mUndoStack,
-	mFolderView, mEditorView, mPluginEditorView , mMarkdownView, mMarkdownEditor,
+	mFolderView, mEditorView, mPluginEditorView, mMarkdownView, mMarkdownEditor,
 	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mEditorCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
 	EventTarget, URITemplate, i18nUtil, PageUtil, util, objects, lib, Deferred, mProjectClient, mSplitter, mTooltip, bidiUtils, mCustomGlobalCommands, mGeneralPrefs, mBreadcrumbs, mKeyBinding,
-	mBreakpoint, mAnnotations, mDebugService, mNativeDeployService, debugMessages, DebugFileImpl
+	mBreakpoint, mAnnotations, mDebugService
 ) {
 
 var exports = {};
+
+// Dynamically loaded
+var mNativeDeployService = null;
+var debugMessages = null;
+var DebugFileImpl = null;
 
 var AT = mAnnotations.AnnotationType;
 
@@ -1378,9 +1380,28 @@ objects.mixin(EditorSetup.prototype, {
 	},
 	
 	getGeneralPreferences: function() {
-		return new mGeneralPrefs.GeneralPreferences(this.preferences).getPrefs().then(function(prefs) {
+		var deferred = new Deferred();
+		new mGeneralPrefs.GeneralPreferences(this.preferences).getPrefs().then(function(prefs) {
 			this.generalPreferences = prefs;
+			// Load debug package if needed
+			if (this.generalPreferences.enableDebugger && !mNativeDeployService) {
+				require(['orion/debug/debugPackage'], function() {
+					require([
+						'orion/debug/nativeDeployService',
+						'i18n!orion/debug/nls/messages',
+						'orion/debug/debugFileImpl'
+					], function(dymNativeDeployService, dyDebugMessage, dyDebugFileImpl) {
+						mNativeDeployService = dymNativeDeployService;
+						debugMessages = dyDebugMessage;
+						DebugFileImpl = dyDebugFileImpl;
+						deferred.resolve();
+					});
+				});
+			} else {
+				deferred.resolve();
+			}
 		}.bind(this));
+		return deferred;
 	},
 	
 	createBanner: function() {

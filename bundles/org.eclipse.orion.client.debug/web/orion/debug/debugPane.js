@@ -12,8 +12,8 @@
 /*eslint-env browser, amd*/
 define([
     'i18n!orion/debug/nls/messages',
-	'orion/webui/littlelib',
-	'orion/i18nUtil',
+    'orion/webui/littlelib',
+    'orion/i18nUtil',
     'orion/debug/debugSocket',
     'orion/debug/breakpoint',
     'orion/section'

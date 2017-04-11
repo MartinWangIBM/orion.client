@@ -20,9 +20,8 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 		'orion/problems/problemsView',
 		'orion/keyBinding',
 		'orion/util',
-		'orion/webui/Slideout',
-		'orion/debug/debugSlideoutViewMode'],
-		function(objects, mCommands, mOutliner, lib, MiniNavViewMode, ProjectNavViewMode, mGlobalCommands, messages, InlineSearchPane, mKeyBinding, mProblemsView, KeyBinding, util, mSlideout, mDebugSlideoutViewMode) {
+		'orion/webui/Slideout'],
+		function(objects, mCommands, mOutliner, lib, MiniNavViewMode, ProjectNavViewMode, mGlobalCommands, messages, InlineSearchPane, mKeyBinding, mProblemsView, KeyBinding, util, mSlideout) {
 
 	/**
 	 * @name orion.sidebar.Sidebar
@@ -396,34 +395,36 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 			});
 			this.commandRegistry.addCommand(openSearchCommand);
 			this.commandRegistry.registerCommandContribution(this.editScope, "orion.openSearch", 101, "orion.menuBarEditGroup/orion.findGroup", false, new mKeyBinding.KeyBinding('h', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
- 		},
+		},
 
 		_createDebugPane: function() {
-			this._debugPanes = new mDebugSlideoutViewMode.DebugSlideoutViewMode(this._slideout, this.serviceRegistry, this.commandRegistry, this.preferences);
-			this.serviceRegistry.registerService("orion.debug.debugPanes", this._debugPanes);
+			require(['orion/debug/debugSlideoutViewMode'], function(mDebugSlideoutViewMode) {
+				this._debugPanes = new mDebugSlideoutViewMode.DebugSlideoutViewMode(this._slideout, this.serviceRegistry, this.commandRegistry, this.preferences);
+				this.serviceRegistry.registerService("orion.debug.debugPanes", this._debugPanes);
 
-			var showDebugCommand = new mCommands.Command({
-				name: messages["Show Debug"], //$NON-NLS-0$
-				id: "orion.showDebug", //$NON-NLS-0$
-				visibleWhen: function() {
-					return true;
-				},
-				callback: function (data) {
-					if (this._debugPanes.isVisible()) {
-						this._debugPanes.hide();
-					} else {
-						var mainSplitter = mGlobalCommands.getMainSplitter();
-						if (mainSplitter.splitter.isClosed()) {
-							mainSplitter.splitter.toggleSidePanel();
+				var showDebugCommand = new mCommands.Command({
+					name: messages["Show Debug"],
+					id: "orion.showDebug",
+					visibleWhen: function() {
+						return true;
+					},
+					callback: function(data) {
+						if (this._debugPanes.isVisible()) {
+							this._debugPanes.hide();
+						} else {
+							var mainSplitter = mGlobalCommands.getMainSplitter();
+							if (mainSplitter.splitter.isClosed()) {
+								mainSplitter.splitter.toggleSidePanel();
+							}
+							this._debugPanes.show();
 						}
-						this._debugPanes.show();
-					}
-				}.bind(this)
-			});
-			
-			this.commandRegistry.addCommand(showDebugCommand);
-			
-			this.commandRegistry.registerCommandContribution(this.toolsScope, "orion.showDebug", 2, "orion.menuBarToolsGroup", false, new KeyBinding.KeyBinding('e', true, false, false));  //$NON-NLS-1$ //$NON-NLS-0$
+					}.bind(this)
+				});
+
+				this.commandRegistry.addCommand(showDebugCommand);
+
+				this.commandRegistry.registerCommandContribution(this.toolsScope, "orion.showDebug", 2, "orion.menuBarToolsGroup", false, new KeyBinding.KeyBinding('e', true, false, false));
+			}.bind(this));
 		}
 	});
 
