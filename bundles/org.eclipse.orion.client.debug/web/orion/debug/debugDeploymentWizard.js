@@ -15,7 +15,7 @@ define([
     'orion/Deferred',
     'orion/fileClient',
     'orion/xhr',
-	'orion/bootstrap',
+    'orion/bootstrap',
     'cfui/plugins/wizards/common/deploymentLogic',
     'orion/webui/Wizard',
     'text!orion/debug/debugDeploymentWizardServerPage.html'
@@ -39,17 +39,17 @@ define([
     var editor;
 
     mBootstrap.startup().then(function(core) {
-		serviceRegistry = core.serviceRegistry;
-		fileClient = new mFileClient.FileClient(serviceRegistry);
+        serviceRegistry = core.serviceRegistry;
+        fileClient = new mFileClient.FileClient(serviceRegistry);
 
         /* set up initial message */
-		document.getElementById('title').appendChild(document.createTextNode(messages["configureApplicationDeployment"]));
+        document.getElementById('title').appendChild(document.createTextNode(messages["configureApplicationDeployment"]));
 
-		/* allow the frame to be closed */
-		document.getElementById('closeDialog').addEventListener('click', closeFrame);
+        /* allow the frame to be closed */
+        document.getElementById('closeDialog').addEventListener('click', closeFrame);
 
-		/* allow frame to be dragged by title bar */
-		var titleBar = document.getElementById('titleBar');
+        /* allow frame to be dragged by title bar */
+        var titleBar = document.getElementById('titleBar');
         var dragging = false;
         var dragContext = {
             startX: 0,

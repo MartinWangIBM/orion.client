@@ -12,27 +12,27 @@
 /* global URL */
 define(["orion/Deferred", "orion/debug/debugSocket"], function(Deferred, mDebugSocket) {
 
-    /**
-     * A read-only file implementation that serves remote-only files streaming from the debugger adapter.
-     * 
-     * @class {orion.debug.DebugFileImpl}
-     * 
-     * @see https://github.com/Microsoft/vscode-debugadapter-node/blob/master/protocol/src/debugProtocol.ts SourceRequest
-     */
+	/**
+	 * A read-only file implementation that serves remote-only files streaming from the debugger adapter.
+	 * 
+	 * @class {orion.debug.DebugFileImpl}
+	 * 
+	 * @see https://github.com/Microsoft/vscode-debugadapter-node/blob/master/protocol/src/debugProtocol.ts SourceRequest
+	 */
 	function DebugFileImpl() {
 	}
 
 	DebugFileImpl.prototype = {
 		fetchChildren: function(location) {
-            return new Deferred().resolve([]);
+			return new Deferred().resolve([]);
 		},
 		loadWorkspaces: function() {
 			return new Deferred().resolve({});
 		},
 		loadWorkspace: function(location) {
 			return new Deferred().reject({
-                error: 'Invalid operation'
-            });
+				error: 'Invalid operation'
+			});
 		},
 		createProject: function(url, projectName, serverPath, create) {
 			throw new Error("Not supported"); //$NON-NLS-0$
@@ -56,23 +56,23 @@ define(["orion/Deferred", "orion/debug/debugSocket"], function(Deferred, mDebugS
 			throw new Error("Not supported"); //$NON-NLS-0$
 		},
 		read: function(loc, isMetadata, acceptPatch, options) {
-            if (loc === '/debug') {
-                return new Deferred().resolve({});
-            }
-            if (isMetadata) {
-                var url = new URL(loc);
-                return new Deferred().resolve({
-                    "Name": url.pathname.substr(url.pathname.lastIndexOf('/') + 1),
-                    "Location": url.pathname,
-                    "Directory": false,
-                    "LocalTimeStamp": Date.now(),
-                    "Parents": [],
-                    "Attributes": {
-                        "ReadOnly": true,
-                        "Executable": false
-                    }
-                });
-            } else {
+			if (loc === '/debug') {
+				return new Deferred().resolve({});
+			}
+			if (isMetadata) {
+				var url = new URL(loc);
+				return new Deferred().resolve({
+					"Name": url.pathname.substr(url.pathname.lastIndexOf('/') + 1),
+					"Location": url.pathname,
+					"Directory": false,
+					"LocalTimeStamp": Date.now(),
+					"Parents": [],
+					"Attributes": {
+						"ReadOnly": true,
+						"Executable": false
+					}
+				});
+			} else {
 				var deferred = new Deferred();
 				var locParams = loc.split('/');
 				var socketId = isFinite(locParams[3]) ? Math.floor(locParams[3]) : -1;
@@ -98,7 +98,7 @@ define(["orion/Deferred", "orion/debug/debugSocket"], function(Deferred, mDebugS
 					});
 				}
 				return deferred;
-            }
+			}
 		},
 		write: function(location, contents, args) {
 			throw new Error("Not supported"); //$NON-NLS-0$	

@@ -129,10 +129,10 @@ define([
         config.launchArguments.type = config.type;
         config.launchArguments.request = 'launch';
 
-        this._socket.on('connect', function() {
+        this._socket.on('connect', /** @this SocketIO.client */ function() {
             if (!that._socket) {
                 // An unexpected reconnection
-                that.disconnect();
+                this.disconnect();
                 return;
             }
             that.dispatchEvent(new LaunchEvent());
