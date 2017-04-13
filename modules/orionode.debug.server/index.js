@@ -18,11 +18,12 @@ var fs = require('fs');
 /**
  * Install endpoints
  * 
+ * @param {Object} options
  * @param {Express} options.app
  * @param {SocketIO.Server} options.io
  * @param {string} [options.listenPath]
  * @param {string} [options.workspaceDir]
- * @return {boolean} success
+ * @return {boolean} - success
  */
 function install(options) {
     try {

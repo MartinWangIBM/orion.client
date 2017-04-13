@@ -802,7 +802,9 @@ define([
 
         // Print stack trace
         this._debugSocket.request('stackTrace', {
-            threadId: e.body.threadId || this._currentThreadId
+            threadId: e.body.threadId || this._currentThreadId,
+            startFrame: 0,
+            levels: 0
         }, function(response) {
             that._handleStackTraceResponse(response, threadId);
         });

@@ -64,8 +64,9 @@ function createAdapter(type) {
 }
 
 /**
- * Get all templates by an adapter type 
- * @param {Array.<Object>} type 
+ * Get all templates by an adapter type
+ * @param {Array.<Object>} type
+ * @return {Array.<Object>} - templates for the given type
  */
 function getTemplates(type) {
     return adaptersTemplate[type] || [];

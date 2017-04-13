@@ -11,8 +11,6 @@
 
 'use strict';
 
-var fs = require('fs');
-var path = require('path');
 var cp = require('child_process');
 var ProtocolServer = require('./protocol').ProtocolServer;
 var DebugProtocol = require('vscode-debugprotocol');
@@ -72,7 +70,7 @@ DebugAdapter.prototype.constructor = DebugAdapter;
 
 /**
  * Handle a request from the debugger
- * @param {DebugProtocol.Request} 
+ * @param {DebugProtocol.Request} request
  */
 DebugAdapter.prototype.dispatchRequest = function(request) {
     this.emit('request', request);
@@ -80,7 +78,7 @@ DebugAdapter.prototype.dispatchRequest = function(request) {
 
 /**
  * Handle an event from the debugger
- * @param {DebugProtocol.Event} 
+ * @param {DebugProtocol.Event} event
  */
 DebugAdapter.prototype.handleEvent = function(event) {
     this.emit('event', event);

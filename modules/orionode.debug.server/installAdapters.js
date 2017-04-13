@@ -53,7 +53,6 @@ function installNext() {
         };
     }
     var packageGit = packageInfo.repository;
-    var packageIgnore = packageInfo.ignore || [];
     var packageBuild = packageInfo.build;
     process.stdout.write(' - Installing ' + packageName + '...');
     var exist = true;
