@@ -41,11 +41,13 @@ var DebugAdapter = function(debuggerConfig, cwd) {
     var program, args;
     if (debuggerConfig.runtime) {
         program = debuggerConfig.runtime;
-        //args = ['--debug', debuggerConfig.program];
-        args = [debuggerConfig.program];
+        args = debuggerConfig.runtimeArgs || [];
+        // args = args.concat(['--debug', debuggerConfig.program]);
+        args = args.concat([debuggerConfig.program]);
+        args = args.concat(debuggerConfig.args || []);
     } else {
         program = debuggerConfig.program;
-        args = [];
+        args = debuggerConfig.args || [];
     }
     this._adapter = cp.spawn(program, args);
     this._adapterOn = !!this._adapter;

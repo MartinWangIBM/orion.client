@@ -858,7 +858,7 @@ define([
      */
     DebugPane.prototype._handleStackTraceResponse = function(response, threadId) {
         if (!response.success) {
-            this._reportError(response.body.error);
+            this._reportError(response.message);
             return;
         }
         var threadElement = lib.$('.thread[threadId="' + threadId + '"]', this._stackTraceElement);
