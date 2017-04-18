@@ -203,7 +203,4 @@ $(document).ready(function () {
     $('#debugger-stepover').click(function () {
         $('#message-out').val(JSON.stringify(PRESET_CMD.next, null, 4));
     });
-    $('#debugger-disconnect').click(function () {
-        $('#message-out').val(JSON.stringify(PRESET_CMD.disconnect, null, 4));
-    });
 });

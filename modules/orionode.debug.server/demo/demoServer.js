@@ -25,4 +25,6 @@ var io = socketio.listen(server, { 'log level': 1 });
 debugServer.install({ app: app, io: io });
 
 app.use(express.static('./demo/public'));
-server.listen(3000);
+server.listen(3000, function() {
+    console.log('Listening ' + 3000);
+});

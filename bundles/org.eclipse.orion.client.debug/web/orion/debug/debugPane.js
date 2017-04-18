@@ -767,17 +767,21 @@ define([
      * @param {DebugProtocol.OutputEvent} e
      */
     DebugPane.prototype._handleOutputEvent = function(e) {
-        var outputElement = document.createElement('div');
-        outputElement.classList.add(e.body.category);
-        if (e.body.variablesReference) {
-            var variableElement = document.createElement('span');
-            variableElement.classList.add('variable');
-            this._renderVariable(variableElement, undefined, e.body.output, e.body.variablesReference);
-            outputElement.appendChild(variableElement);
+        if (e.body.category === 'telemetry') {
+            console.info('Debug adapter telemetry:', e.body.output, e.body.data);
         } else {
-            outputElement.innerText = e.body.output;
+            var outputElement = document.createElement('div');
+            outputElement.classList.add(e.body.category);
+            if (e.body.variablesReference) {
+                var variableElement = document.createElement('span');
+                variableElement.classList.add('variable');
+                this._renderVariable(variableElement, undefined, e.body.output, e.body.variablesReference);
+                outputElement.appendChild(variableElement);
+            } else {
+                outputElement.innerText = e.body.output;
+            }
+            this._appendOutputElement(outputElement);
         }
-        this._appendOutputElement(outputElement);
     };
 
     /**
@@ -803,8 +807,8 @@ define([
         // Print stack trace
         this._debugSocket.request('stackTrace', {
             threadId: e.body.threadId || this._currentThreadId,
-            startFrame: 0,
-            levels: 0
+            //startFrame: 0,
+            //levels: 99
         }, function(response) {
             that._handleStackTraceResponse(response, threadId);
         });
