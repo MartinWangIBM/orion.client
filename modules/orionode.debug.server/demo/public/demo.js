@@ -2,10 +2,10 @@ $(document).ready(function () {
     var PRESET_CONFIG = {
         node: {
             name: 'Launch Program',
-            type: 'node',
+            type: 'node2',
             request: 'launch',
-            program: '/Users/ibm/dev/org.eclipse.orion.client/modules/orionode/server.js',
-            cwd: '/Users/ibm/dev/org.eclipse.orion.client/modules/orionode'
+            program: '/Users/ibm/dev/demoNode/inject.js',
+            cwd: '/Users/ibm/dev/demoNode'
         },
         lldb: {
             "type": "lldb",
@@ -100,7 +100,7 @@ $(document).ready(function () {
 
         // Start a debug session
         var initCmd = JSON.parse(JSON.stringify(INIT_CMD));
-        initCmd.arguments.adapterID = type;
+        initCmd.arguments.adapterID = PRESET_CONFIG[type].type;
 
         socket.emit('init', initCmd);
 

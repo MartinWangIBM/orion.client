@@ -16,8 +16,9 @@ define([
     'orion/i18nUtil',
     'orion/debug/debugSocket',
     'orion/debug/breakpoint',
-    'orion/section'
-], function(messages, lib, i18nUtil, mDebugSocket, mBreakpoint, mSection) {
+    'orion/section',
+    'orion/fileClient'
+], function(messages, lib, i18nUtil, mDebugSocket, mBreakpoint, mSection, mFileClient) {
 
     'use strict';
 
@@ -44,6 +45,7 @@ define([
         this._watchListElement = lib.$('.watchList', this._domNode);
         this._variableListElement = lib.$('.variableList', this._domNode);
         this._breakpointsElement = lib.$('.breakpoints', this._domNode);
+        this._fileClient = new mFileClient.FileClient(serviceRegistry);
 
         this._threads = {};
         this._stoppedThreads = {};
@@ -74,6 +76,7 @@ define([
         lib.$('.debugReverse', this._domNode).addEventListener('click', this._reverseOnClick.bind(this));
         lib.$('.debugStepBack', this._domNode).addEventListener('click', this._stepBackOnClick.bind(this));
         lib.$('.debugRestartFrame', this._domNode).addEventListener('click', this._restartFrameOnClick.bind(this));
+        lib.$('.debugUpdateScript', this._domNode).addEventListener('click', this._updateScriptOnClick.bind(this));
 
         lib.$('.replInput input', this._domNode).addEventListener('change', this._replOnSubmit.bind(this));
 
@@ -118,6 +121,7 @@ define([
         buttons.appendChild(this._createDebugCommandButton('debugReverse', messages['ReverseContinue'], true, true));
         buttons.appendChild(this._createDebugCommandButton('debugStepBack', messages['StepBack'], true, true));
         buttons.appendChild(this._createDebugCommandButton('debugRestartFrame', messages['RestartFrame'], true, true));
+        buttons.appendChild(this._createDebugCommandButton('debugUpdateScript', 'Update Script', true, true));
         domNode.appendChild(buttons);
 
         // Stop reason
@@ -310,6 +314,11 @@ define([
                 }
             } else if (buttons[i].classList.contains('debugRestartFrame')) {
                 if (e.capabilities.supportsRestartFrame) {
+                    buttons[i].removeAttribute('disabled');
+                    buttons[i].classList.remove('disabled');
+                }
+            } else if (buttons[i].classList.contains('debugUpdateScript')) {
+                if (e.capabilities.supportsSetScriptSource) {
                     buttons[i].removeAttribute('disabled');
                     buttons[i].classList.remove('disabled');
                 }
@@ -1049,6 +1058,18 @@ define([
                 frameId: this._currentFrameId
             });
         }
+    };
+
+    DebugPane.prototype._updateScriptOnClick = function(e) {
+        var path = location.hash.substr(1).split(',')[0];
+        this._fileClient.read(path, false).then(function(content) {
+            this._debugSocket.request('setScriptSource', {
+                source: {
+                    path: this._debugSocket.projectToAbsolutePath(path)
+                },
+                content: content
+            });
+        }.bind(this));
     };
 
     /**
